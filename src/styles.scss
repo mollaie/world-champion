@@ -1,1 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
+
+@import "./assets/theme/colors.scss";
+
+body {
+  display: flex;
+  flex-direction: column;
+}
