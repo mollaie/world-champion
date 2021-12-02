@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 
 export interface IDataSet {
   schema: Array<ITableSchema>;
-  data$: Observable<ITableDataContract>;
+  data$?: Observable<ITableDataContract>;
 }
 
 export interface ITableSchema {
@@ -16,7 +16,7 @@ export interface ITableDataContract {
   limit: number;
   offset: number;
   total: number;
-  data: Array<unknown>;
+  data: Array<any>;
 }
 
 export type TableSchemaType =
@@ -24,4 +24,5 @@ export type TableSchemaType =
   | 'HyperLink'
   | 'AutoNumber'
   | 'Date'
+  | 'Time'
   | 'Number';

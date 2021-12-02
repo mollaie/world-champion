@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 /**
  * Single component for navigation bar
  * It's included two major parts
@@ -56,9 +56,11 @@ import { Component } from '@angular/core';
   ],
 })
 export class NavbarComponent {
+  @Output() SeasonChanged = new EventEmitter<number>();
+
   logo_lottie_option = {
     path: 'assets/lotties/logo.json',
   };
 
-  onSelectSeason = (year: number) => console.log(year);
+  onSelectSeason = (year: number) => this.SeasonChanged.emit(year);
 }

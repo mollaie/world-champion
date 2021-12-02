@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  ergast_api: 'https://ergast.com/api/',
+  ergast_api: 'https://ergast.com/api/f1',
   beginning_year: 2005,
   page_limit: 10,
 };
