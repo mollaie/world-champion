@@ -7,7 +7,10 @@ import {
   Output,
 } from '@angular/core';
 
-import { IDataSet } from 'src/app/interfaces/table-dataset.interface';
+import {
+  IDataSet,
+  ITableSchema,
+} from 'src/app/interfaces/table-dataset.interface';
 import { environment } from 'src/environments/environment';
 
 /**
@@ -34,42 +37,120 @@ import { environment } from 'src/environments/environment';
         </thead>
 
         <tbody>
-          <tr *ngFor="let row of data">
-            <td *ngFor="let col of DataSet?.schema">{{ row[col.field] }}</td>
+          <tr *ngFor="let row of data; let i = index">
+            <td
+              *ngFor="let col of DataSet?.schema"
+              [ngClass]="{ special: row[SpecialField] }"
+            >
+              <div [ngSwitch]="col.type">
+                <div *ngSwitchCase="'String'">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      StringColumn;
+                      context: { $implicit: row[col.field] }
+                    "
+                  ></ng-container>
+                </div>
+                <div *ngSwitchCase="'HyperLink'">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      HyperLinkColumn;
+                      context: {
+                        $implicit: {
+                          value: row[col.field],
+                          rowIndex: i,
+                          column: col
+                        }
+                      }
+                    "
+                  ></ng-container>
+                </div>
+                <div *ngSwitchCase="'AutoNumber'">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      AutoNumberColumn;
+                      context: { $implicit: i }
+                    "
+                  ></ng-container>
+                </div>
+                <div *ngSwitchCase="'Date'">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      DateColumn;
+                      context: { $implicit: row[col.field] }
+                    "
+                  ></ng-container>
+                </div>
+                <div *ngSwitchCase="'Time'">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      TimeColumn;
+                      context: { $implicit: row[col.field] }
+                    "
+                  ></ng-container>
+                </div>
+                <div *ngSwitchCase="'Number'">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      NumberColumn;
+                      context: { $implicit: row[col.field] }
+                    "
+                  ></ng-container>
+                </div>
+                <div *ngSwitchDefault>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      StringColumn;
+                      context: { $implicit: row[col.field] }
+                    "
+                  ></ng-container>
+                </div>
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <nav aria-label="Page navigation" *ngIf="DisplayPagination">
-      <ul class="pagination justify-content-center">
-        <li class="page-item" [ngClass]="{ disabled: offset === 1 }">
-          <a class="page-link" (click)="onPreviousPage()">Previous</a>
-        </li>
+    <ng-template #StringColumn let-value>
+      {{ value }}
+    </ng-template>
 
-        <li
-          class="page-item"
-          *ngFor="let page of total_page; let i = index"
-          [ngClass]="{ active: i + 1 === current_page }"
-        >
-          <a class="page-link" (click)="onPageChange(i + 1)">{{ i + 1 }}</a>
-        </li>
+    <ng-template #DateColumn let-value>{{
+      value | date: 'yyyy MMM dd'
+    }}</ng-template>
 
-        <li
-          class="page-item"
-          [ngClass]="{ disabled: offset === total_page.length }"
-        >
-          <a class="page-link" (click)="onNextPage()">Next</a>
-        </li>
-      </ul>
-    </nav>
+    <ng-template #TimeColumn let-value>{{ value | date: 'h:mm' }}</ng-template>
+
+    <ng-template #HyperLinkColumn let-value
+      ><a (click)="onHyperLinkClicked(value)" class="hyperLink">{{
+        value.value
+      }}</a></ng-template
+    >
+
+    <ng-template #AutoNumberColumn let-value>{{ value + 1 }}</ng-template>
+    <ng-template #NumberColumn let-value
+      ><b>{{ value }}</b></ng-template
+    >
   `,
-  styles: [``],
+  styles: [
+    `
+      .hyperLink {
+        text-decoration: underline;
+        color: var(--bs-blue);
+      }
+
+      .special {
+        background-color: var(--bs-cyan);
+        color: #ffffff;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TableComponent {
   constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
-
+  @Input() SpecialField: string = '';
   @Input() DisplayPagination: boolean = true;
   /**
    * The Dataset is an input which is the result of REST API call
@@ -103,6 +184,13 @@ export class TableComponent {
    */
   @Output() PageChange = new EventEmitter<{ offset: number; limit: number }>();
 
+  /**
+   * In case of handling hyper link click action, table needs to capture the column and related row which user click on it and hand over event to parent component
+   */
+  @Output() HyperLinkClicked = new EventEmitter<{
+    column: ITableSchema;
+    rowIndex: number;
+  }>();
   ///#region Local variables ==>
 
   data: Array<any> = [];
@@ -114,59 +202,13 @@ export class TableComponent {
   ///#endregion Local variables <==
 
   /**
-   * To populate pages indicator we need to calculate total rows divided by limit
-   * If number of pages is increased more than 10 pages and in terms of keeping UI consistency
-   * It needs to filter out
-   *
-   * TODO :
-   * if number of pages exceed from 10 it must display ... or display more
-   * to cover the requirement, needs to implement display more and re-calculate from current page plus 10 pages more
-   * and remove previous pages from pagination bar in case of keep UI consistency
-   */
-  public get total_page(): Array<number> {
-    const length =
-      this.total / this.offset > 10
-        ? 10
-        : Math.trunc(Math.round(this.total / this.offset));
-
-    return length > 0 ? Array.from(Array(length).keys()) : [];
-  }
-
-  /**
-   * This function is taking care about the page changes and emit PageChange event
-   * In case of avoiding unnecessary request it needs to control if current page is equal to clicked one
+   * This function is binding to Hyperlink columns and fire related event in case of handing over values to the parent component
    * @param value
+   * @returns
    */
-  onPageChange = (value: number) => {
-    if (this.current_page !== value) {
-      this.current_page = value;
-      this.PageChange.emit({ offset: this.current_page, limit: this.limit });
-    }
-  };
-
-  /**
-   * This function is bind to NextPage button and move one step forward
-   * To avoid unnecessary request, needs to control if current page is the last page should not fire
-   * However it's controlling on template by adding (disabled) class and turn of the button, but in case of double sides control
-   * It's good to check here as well
-   */
-  onNextPage = () => {
-    if (this.current_page < this.total_page.length) {
-      this.current_page++;
-      this.PageChange.emit({ offset: this.current_page, limit: this.limit });
-    }
-  };
-
-  /**
-   * This function is bind to NextPage button and move one step backward
-   * To avoid unnecessary request, needs to control if current page is the first page should not fire
-   * However it's controlling on template by adding (disabled) class and turn of the button, but in case of double sides control
-   * It's good to check here as well
-   */
-  onPreviousPage = () => {
-    if (this.current_page > 1) {
-      this.current_page--;
-      this.PageChange.emit({ offset: this.current_page, limit: this.limit });
-    }
-  };
+  onHyperLinkClicked = (value: {
+    value: string;
+    rowIndex: number;
+    column: ITableSchema;
+  }) => this.HyperLinkClicked.emit({ ...value });
 }

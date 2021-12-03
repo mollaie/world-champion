@@ -17,12 +17,16 @@ import { constructorReducer } from 'src/app/reducers/constructor.reducers';
 import { ConstructorsEffects } from 'src/app/effects/constructor.effects';
 import {
   CONSTRUCTOR_STORE_KEY,
+  DRIVER_STANDING_STORE_KEY,
   DRIVER_STORE_KEY,
   RACE_STORE_KEY,
 } from 'src/app/constants/keywords.const';
+import { driverStandingReducer } from 'src/app/reducers/driver-standing.reducers';
+import { DriverStandingEffects } from 'src/app/effects/driver-standing.effects';
+import { DriverStandingComponent } from 'src/app/components/shared/driver-standing.component';
 
 @NgModule({
-  declarations: [HomeComponent],
+  declarations: [HomeComponent, DriverStandingComponent],
   imports: [
     CommonModule,
     HomeRoutingModule,
@@ -31,7 +35,13 @@ import {
     StoreModule.forFeature(RACE_STORE_KEY, raceReducer),
     StoreModule.forFeature(DRIVER_STORE_KEY, driverReducer),
     StoreModule.forFeature(CONSTRUCTOR_STORE_KEY, constructorReducer),
-    EffectsModule.forFeature([RaceEffects, DriverEffects, ConstructorsEffects]),
+    StoreModule.forFeature(DRIVER_STANDING_STORE_KEY, driverStandingReducer),
+    EffectsModule.forFeature([
+      RaceEffects,
+      DriverEffects,
+      ConstructorsEffects,
+      DriverStandingEffects,
+    ]),
   ],
   providers: [RaceApiService],
 })

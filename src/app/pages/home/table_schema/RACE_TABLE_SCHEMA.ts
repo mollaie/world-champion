@@ -23,7 +23,7 @@ export const RACE_TABLE_SCHEMA: Array<ITableSchema> = [
     field: 'time',
     order: 0,
     title: 'Hour',
-    type: 'Time',
+    type: 'String',
   },
   {
     field: 'country',

@@ -33,3 +33,16 @@ export const CONSTRUCTOR_LOAD_ERROR_ACTION: string =
 
 export const CONSTRUCTOR_STORE_KEY = 'Constructor';
 ///#endregion
+
+///#region Driver Standing
+export const DRIVER_STANDING_ENTITY_KEYWORD: string = 'Driver Standing';
+
+export const DRIVER_STANDING_LOAD_ACTION: string =
+  '[Home Page] Driver Standing Load';
+export const DRIVER_STANDING_LOADED_ACTION: string =
+  '[Home Page] Driver Standing Loaded';
+export const DRIVER_STANDING_LOAD_ERROR_ACTION: string =
+  '[Home Page] Error On Loading Driver Standing';
+
+export const DRIVER_STANDING_STORE_KEY = 'Driver Standing';
+///#endregion

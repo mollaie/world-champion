@@ -1,4 +1,22 @@
+<div class="bg-abstract"></div>
+
 <div class="container mt-3">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card p-2 shadow-sm p-3 mb-5 bg-white rounded">
+        <div class="card-body">
+          <h5 class="card-title">
+            <i class="bi bi-bar-chart-steps"></i> Driver Standing
+          </h5>
+        </div>
+
+        <champ-driver-standing
+          [Dataset]="driverStanding$"
+        ></champ-driver-standing>
+      </div>
+    </div>
+  </div>
+
   <div class="row">
     <div class="col-md-12">
       <div class="card p-2 shadow-sm p-3 mb-5 bg-white rounded">
@@ -11,6 +29,7 @@
         <champ-table
           [DataSet]="raceDataset"
           (PageChange)="onPageChange($event)"
+          (HyperLinkClicked)="onRaceTableHyperLinkClicked($event)"
         ></champ-table>
       </div>
     </div>

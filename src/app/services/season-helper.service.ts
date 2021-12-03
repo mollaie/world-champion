@@ -5,10 +5,11 @@ import { loadingRaceAction } from '../actions/race.actions';
 import { loadingDriverAction } from '../actions/driver.actions';
 import { AppState } from '../app.state';
 import { loadingConstructorAction } from '../actions/constructor.actions';
+import { loadingDriverStandingAction } from '../actions/driver-standing.action';
 
 const default_year = environment.beginning_year;
 const default_limit = environment.page_limit;
-const default_offset = environment.page_limit;
+const default_offset = environment.page_offset;
 
 @Injectable({
   providedIn: 'root',
@@ -48,6 +49,15 @@ export class SeasonHelperService {
       loadingConstructorAction({
         year: params?.year ? params.year : default_year,
         limit: params?.limit ? params.limit : default_limit,
+        offset: params?.offset ? params.offset : default_offset,
+      })
+    );
+
+    //Dispatch Driver Standing
+    this.store.dispatch(
+      loadingDriverStandingAction({
+        year: params?.year ? params.year : default_year,
+        limit: params?.limit ? params.limit : 10000, // There is an intention to remove limitation for this specific list
         offset: params?.offset ? params.offset : default_offset,
       })
     );

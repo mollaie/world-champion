@@ -19,8 +19,10 @@ import { MRData, RacePayload } from 'src/app/interfaces/race.interface';
 import {
   IDataSet,
   ITableDataContract,
+  ITableSchema,
 } from 'src/app/interfaces/table-dataset.interface';
-import { selectConstructor } from 'src/app/selectors/constructor.selector';
+import { selectConstructorData } from 'src/app/selectors/constructor.selector';
+import { selectDriverStandingData } from 'src/app/selectors/driver-standing.selector';
 import { selectDriverData } from 'src/app/selectors/driver.selectors';
 import { selectRaceData } from 'src/app/selectors/race.selectors';
 import { SeasonHelperService } from 'src/app/services/season-helper.service';
@@ -37,7 +39,8 @@ import { RACE_TABLE_SCHEMA } from './table_schema/RACE_TABLE_SCHEMA';
 export class HomeComponent implements OnInit {
   races$ = this.store.select(selectRaceData);
   drivers$ = this.store.select(selectDriverData);
-  constructors$ = this.store.select(selectConstructor);
+  constructors$ = this.store.select(selectConstructorData);
+  driverStanding$ = this.store.select(selectDriverStandingData);
 
   raceDataset: IDataSet = {
     schema: RACE_TABLE_SCHEMA,
@@ -105,15 +108,17 @@ export class HomeComponent implements OnInit {
       data$: <Observable<ITableDataContract>>this.drivers$.pipe(
         map((driver: DriverState) => driver.Driver),
         map((driver: DriverPayload) => driver.MRData),
-        map((driver: DriverMrData) => driver.DriverTable),
         map((driver) => {
           return <ITableDataContract | unknown>{
-            data: driver.Drivers.map((data) => {
+            data: driver.DriverTable.Drivers.map((data) => {
               return {
                 ...data,
                 name: `${data?.givenName}  ${data?.familyName}`,
               };
             }),
+            limit: driver.limit,
+            offset: driver.offset,
+            total: driver.total,
           };
         })
       ),
@@ -125,13 +130,22 @@ export class HomeComponent implements OnInit {
       data$: <Observable<ITableDataContract>>this.constructors$.pipe(
         map((constructor: ConstructorState) => constructor.Constructor),
         map((constructor: ConstructorPayload) => constructor.MRData),
-        map((constructor: ConstructorMrData) => constructor.ConstructorTable),
         map((constructor) => {
           return <ITableDataContract | unknown>{
-            data: constructor.Constructors.map((data) => data),
+            data: constructor.ConstructorTable.Constructors.map((data) => data),
+            limit: constructor.limit,
+            offset: constructor.offset,
+            total: constructor.total,
           };
         })
       ),
     };
+  };
+
+  onRaceTableHyperLinkClicked = (value: {
+    column: ITableSchema;
+    rowIndex: number;
+  }) => {
+    console.log(value);
   };
 }
