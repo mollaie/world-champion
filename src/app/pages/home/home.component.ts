@@ -2,17 +2,31 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { loadingRaceAction } from 'src/app/actions/race.actions';
 import { AppState } from 'src/app/app.state';
+import { ConstructorState } from 'src/app/interfaces/constructor-state.interface';
+import {
+  ConstructorPayload,
+  MRData as ConstructorMrData,
+} from 'src/app/interfaces/constructor.interface';
+import { DriverState } from 'src/app/interfaces/driver-state.interface';
+import {
+  DriverPayload,
+  MRData as DriverMrData,
+} from 'src/app/interfaces/driver.interface';
 import { RaceState } from 'src/app/interfaces/race-state.interface';
 import { MRData, RacePayload } from 'src/app/interfaces/race.interface';
+
 import {
   IDataSet,
   ITableDataContract,
 } from 'src/app/interfaces/table-dataset.interface';
+import { selectConstructor } from 'src/app/selectors/constructor.selector';
+import { selectDriverData } from 'src/app/selectors/driver.selectors';
 import { selectRaceData } from 'src/app/selectors/race.selectors';
-import { environment } from 'src/environments/environment';
-import { RACE_TABLE_SCHEMA } from './RACE_TABLE_SCHEMA';
+import { SeasonHelperService } from 'src/app/services/season-helper.service';
+import { CONSTRUCTOR_TABLE_SCHEMA } from './table_schema/CONSTRUCTOR_TABLE_SCHEMA';
+import { DRIVER_TABLE_SCHEMA } from './table_schema/DRIVER_TABLE_SCHEMA';
+import { RACE_TABLE_SCHEMA } from './table_schema/RACE_TABLE_SCHEMA';
 
 @Component({
   selector: 'app-home',
@@ -22,29 +36,49 @@ import { RACE_TABLE_SCHEMA } from './RACE_TABLE_SCHEMA';
 })
 export class HomeComponent implements OnInit {
   races$ = this.store.select(selectRaceData);
-  dataset: IDataSet = {
+  drivers$ = this.store.select(selectDriverData);
+  constructors$ = this.store.select(selectConstructor);
+
+  raceDataset: IDataSet = {
     schema: RACE_TABLE_SCHEMA,
   };
 
-  constructor(private readonly store: Store<AppState>) {}
+  driverDataset: IDataSet = {
+    schema: DRIVER_TABLE_SCHEMA,
+  };
+
+  constructorDataset: IDataSet = {
+    schema: CONSTRUCTOR_TABLE_SCHEMA,
+  };
+
+  constructor(
+    private readonly store: Store<AppState>,
+    private readonly seasonHelper: SeasonHelperService
+  ) {}
 
   ngOnInit(): void {
     this.onLoad();
   }
 
-  onSeasonChanged = (year: number) => this.onLoad(year);
+  /**
+   * Handover values of offset and limit which is retrieve from custom table to onLoad method
+   * @param event
+   * @returns
+   */
+  onPageChange = (event: { offset: number; limit: number }) =>
+    this.onLoad({ ...event });
 
-  onLoad = (year: number = environment.beginning_year) => {
-    this.store.dispatch(
-      loadingRaceAction({
-        year,
-        limit: environment.page_limit,
-        offset: environment.page_limit,
-      })
-    );
+  /**
+   * This method is suppose to call onLoad method from Season Helper in case of populate values for default year on component init
+   * Also and data parsing on result set (the Observable object which is retrieving from Store) before hand it over to table
+   * @param params
+   */
+  onLoad = (params?: { year?: number; offset?: number; limit?: number }) => {
+    this.seasonHelper.onLoad({ ...params });
 
-    this.dataset = {
-      ...this.dataset,
+    //Map race's data before handover to table
+    this.raceDataset = {
+      ...this.raceDataset,
       data$: <Observable<ITableDataContract>>this.races$.pipe(
         map((race: RaceState) => race.Race),
         map((race: RacePayload) => race.MRData),
@@ -60,6 +94,41 @@ export class HomeComponent implements OnInit {
             limit: mrData.limit,
             offset: mrData.offset,
             total: mrData.total,
+          };
+        })
+      ),
+    };
+
+    //Map driver's data before handover to table
+    this.driverDataset = {
+      ...this.driverDataset,
+      data$: <Observable<ITableDataContract>>this.drivers$.pipe(
+        map((driver: DriverState) => driver.Driver),
+        map((driver: DriverPayload) => driver.MRData),
+        map((driver: DriverMrData) => driver.DriverTable),
+        map((driver) => {
+          return <ITableDataContract | unknown>{
+            data: driver.Drivers.map((data) => {
+              return {
+                ...data,
+                name: `${data?.givenName}  ${data?.familyName}`,
+              };
+            }),
+          };
+        })
+      ),
+    };
+
+    //Map constructor's data before handover to table
+    this.constructorDataset = {
+      ...this.constructorDataset,
+      data$: <Observable<ITableDataContract>>this.constructors$.pipe(
+        map((constructor: ConstructorState) => constructor.Constructor),
+        map((constructor: ConstructorPayload) => constructor.MRData),
+        map((constructor: ConstructorMrData) => constructor.ConstructorTable),
+        map((constructor) => {
+          return <ITableDataContract | unknown>{
+            data: constructor.Constructors.map((data) => data),
           };
         })
       ),

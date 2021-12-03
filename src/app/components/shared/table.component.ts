@@ -41,7 +41,7 @@ import { environment } from 'src/environments/environment';
       </table>
     </div>
 
-    <nav aria-label="Page navigation">
+    <nav aria-label="Page navigation" *ngIf="DisplayPagination">
       <ul class="pagination justify-content-center">
         <li class="page-item" [ngClass]="{ disabled: offset === 1 }">
           <a class="page-link" (click)="onPreviousPage()">Previous</a>
@@ -70,6 +70,7 @@ import { environment } from 'src/environments/environment';
 export class TableComponent {
   constructor(private readonly changeDetectorRef: ChangeDetectorRef) {}
 
+  @Input() DisplayPagination: boolean = true;
   /**
    * The Dataset is an input which is the result of REST API call
    * It is retrieving as an Observable object
@@ -83,7 +84,7 @@ export class TableComponent {
     v.data$?.subscribe((d) => {
       this.data = d.data;
       this.total = d.total;
-      this.offset = d.offset;
+      this.offset = d.offset * d.limit;
       this.limit = d.limit;
 
       //In case of forcing angular change detector to detect changes and re-render partial DOM it needs to call detect changes on change detector reference

@@ -1,10 +1,15 @@
 import { Component } from '@angular/core';
+import { SeasonHelperService } from './services/season-helper.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  title = 'world-champion';
+  title = 'World F1 Champion';
+
+  constructor(private readonly seasonHelper: SeasonHelperService) {}
+
+  onSeasonChanged = (year: number) => this.seasonHelper.onLoad({ year });
 }

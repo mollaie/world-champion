@@ -5,6 +5,7 @@ import { SeasonDropDownComponent } from './season-dropdown.component';
 import { FormsModule } from '@angular/forms';
 import { PipesModule } from 'src/app/pipes/pipes.module';
 import { LottieModule } from 'ngx-lottie';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [NavbarComponent, SeasonDropDownComponent],
@@ -13,6 +14,7 @@ import { LottieModule } from 'ngx-lottie';
     FormsModule,
     PipesModule,
     LottieModule.forRoot({ player: () => import('lottie-web') }),
+    RouterModule,
   ],
   exports: [NavbarComponent, SeasonDropDownComponent],
 })

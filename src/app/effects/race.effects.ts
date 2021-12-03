@@ -20,7 +20,7 @@ export class RaceEffects {
       ofType(loadingRaceAction),
       //Call rest api with set parameters
       mergeMap((action) =>
-        this.raceApi.fetchRaces(action.year, action.limit, action.offset).pipe(
+        this.raceApi.fetch(action.year, action.limit, action.offset).pipe(
           //Map the result into related action
           map((race) => loadedRaceAction({ race })),
 
