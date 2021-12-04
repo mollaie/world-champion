@@ -1,4 +1,4 @@
-import { Inject, NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, Inject, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { HttpClientModule } from '@angular/common/http';
@@ -33,5 +33,6 @@ import { NotFoundComponent } from './pages/not-found/not-found.component';
   ],
   providers: [],
   bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppModule {}

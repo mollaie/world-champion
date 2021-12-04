@@ -1,6 +1,6 @@
 export interface Driver {
   driverId: string;
-  permanentNumber: string;
+  permanentNumber?: string;
   code: string;
   url: string;
   givenName: string;

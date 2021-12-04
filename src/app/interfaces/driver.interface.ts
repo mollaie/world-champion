@@ -6,7 +6,7 @@ export interface Driver {
   familyName: string;
   dateOfBirth: string;
   nationality: string;
-  permanentNumber: string;
+  permanentNumber?: string;
 }
 
 export interface DriverTable {
