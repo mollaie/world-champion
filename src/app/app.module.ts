@@ -14,6 +14,7 @@ import { LottieModule } from 'ngx-lottie';
 
 import { LayoutModule } from './components/layout/layout.module';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
+import { ServiceWorkerModule } from '@angular/service-worker';
 
 @NgModule({
   declarations: [AppComponent, NotFoundComponent],
@@ -30,6 +31,12 @@ import { NotFoundComponent } from './pages/not-found/not-found.component';
       logOnly: environment.production,
     }),
     BrowserAnimationsModule,
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      enabled: environment.production,
+      // Register the ServiceWorker as soon as the app is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000'
+    }),
   ],
   providers: [],
   bootstrap: [AppComponent],
