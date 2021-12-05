@@ -3,7 +3,11 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  ergast_api: 'https://ergast.com/api/f1',
+  beginning_year: 2005,
+  page_limit: 100,
+  page_offset: 0,
 };
 
 /*
