@@ -52,3 +52,7 @@ npx cap open ios
 npx cap open android
 
 and run simulator on x-code or android studio
+
+## Further Documentation
+
+In case of knowing more about project structure, dependencies, modules and ... you may refer to the documentation folder beside the project and open index.html
