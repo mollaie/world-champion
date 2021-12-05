@@ -18,7 +18,7 @@ import { NotFoundComponent } from './pages/not-found/not-found.component';
 @NgModule({
   declarations: [AppComponent, NotFoundComponent],
   imports: [
-    BrowserModule,
+    BrowserModule.withServerTransition({ appId: 'serverApp' }),
     AppRoutingModule,
     HttpClientModule,
     LayoutModule,
